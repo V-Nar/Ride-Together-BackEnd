@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
+const jsonWebToken = require("jsonwebtoken");
 
 /**
  * All routes are prefixed with /api/auth
@@ -32,6 +33,30 @@ router.post("/signup", async (req, res, next) => {
     };
     const createdUser = await User.create(newUser);
     res.status(201).json(createdUser);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/login", async (req, res, next) => {
+  const { username, password } = req.body;
+  try {
+    const foundUser = await User.findOne({ username });
+    if (!foundUser) {
+      res
+        .status(400)
+        .json({ message: "could not find an account with this username" });
+    }
+    const matchingPassword = bcrypt.compareSync(password, foundUser.password);
+    if (!matchingPassword) {
+      res.status(400).json({ message: "wrong password" });
+    }
+    const payload = { username };
+    const token = jsonWebToken.sign(payload, process.env.TOKEN_SECRET, {
+      algorithm: "HS256",
+      expiresIn: "10d",
+    });
+    res.status(200).json(token);
   } catch (error) {
     next(error);
   }
