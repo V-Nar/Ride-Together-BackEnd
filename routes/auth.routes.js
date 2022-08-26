@@ -2,9 +2,9 @@ const router = require("express").Router();
 const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 
-router.get("/", (req, res, next) => {
-  res.json("All good in here");
-});
+/**
+ * All routes are prefixed with /api/auth
+ */
 
 // Signing up routes
 router.post("/signup", async (req, res, next) => {
