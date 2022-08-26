@@ -33,11 +33,12 @@ router.get("/:id", async (req, res, next) => {
 router.patch("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const characterToUpdate = req.body;
+    const { password, level } = req.body;
     // encrypt password for security reason
+    const hashedPassword = bcrypt.hashSync(password);
     const updateCharacter = await User.findByIdAndUpdate(
       id,
-      { password: characterToUpdate.level, level: characterToUpdate.level },
+      { password: hashedPassword, level },
       {
         new: true,
       }
