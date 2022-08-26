@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { json } = require("express");
 const { findByIdAndUpdate } = require("../models/User.model");
 const User = require("../models/User.model");
+const bcrypt = require("bcryptjs");
 
 /**
  * All routes are prefixed with /api/user
@@ -32,20 +33,16 @@ router.get("/:id", async (req, res, next) => {
 router.patch("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const newUpdatedCharacter = req.body;
-    const foundId = await User.findById(id);
-    if (foundId) {
-      const updatedCharacter = await User.findByIdAndUpdate(
-        id,
-        newUpdatedCharacter,
-        {
-          new: true,
-        }
-      );
-      res.status("201").json(updatedCharacter);
-    } else {
-      return res.json({ message: "character not found" });
-    }
+    const characterToUpdate = req.body;
+    // encrypt password for security reason
+    const updateCharacter = await User.findByIdAndUpdate(
+      id,
+      { password: characterToUpdate.level, level: characterToUpdate.level },
+      {
+        new: true,
+      }
+    );
+    res.status("201").json(updateCharacter);
   } catch (error) {
     next("error");
   }
