@@ -3,6 +3,7 @@ const { json } = require("express");
 const { findByIdAndUpdate } = require("../models/User.model");
 const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
+const { isAuthenticated, isAdmin } = require("../middleware/middleware");
 
 /**
  * All routes are prefixed with /api/user
@@ -30,9 +31,9 @@ router.get("/:id", async (req, res, next) => {
 });
 
 // update user profile
-router.patch("/:id", async (req, res, next) => {
+router.patch("/:id", isAuthenticated, async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { id } = req.user;
     const { password, level } = req.body;
     // encrypt password for security reason
     const hashedPassword = bcrypt.hashSync(password);
@@ -50,10 +51,25 @@ router.patch("/:id", async (req, res, next) => {
 });
 
 // delete user profile
-router.delete("/:id", async (req, res, next) => {
+router.delete(
+  "/deleteprofile/:id",
+  isAuthenticated,
+  isAdmin,
+  async (req, res, next) => {
+    try {
+      await User.findByIdAndDelete(req.params.id);
+      return res.status("201").send(`Character deleted : ${req.params.id}`);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+//delete own profile
+router.delete("/deleteprofile", isAuthenticated, async (req, res, next) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
-    return res.status("201").send(`Character deleted : ${req.params.id}`);
+    const { id } = req.user;
+    await User.findByIdAndDelete(id);
+    return res.status("201").send(`Character deleted : ${id}`);
   } catch (error) {
     next(error);
   }
