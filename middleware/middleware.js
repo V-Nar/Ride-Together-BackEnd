@@ -1,6 +1,5 @@
 const jsonWebToken = require("jsonwebtoken");
 const User = require("../models/User.model");
-const jsonWebToken = require("jsonwebtoken");
 const isAuthenticated = async (req, res, next) => {
   let token = req.headers.authorization;
   if (!token) {
@@ -20,4 +19,12 @@ const isAuthenticated = async (req, res, next) => {
   next();
 };
 
-module.exports = { isAuthenticated };
+const isAdmin = (req, res, next) => {
+  if (req.user.role === "admin") {
+    next();
+  } else {
+    return res.status(401).json({ message: "Denied !" });
+  }
+};
+
+module.exports = { isAuthenticated, isAdmin };
