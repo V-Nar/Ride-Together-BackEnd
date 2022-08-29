@@ -5,28 +5,29 @@ const { isAuthenticated, isAdminOrPromoter } = require('../middleware/middleware
 
 /** 
  * all routes are prefix by /api/event
-*/
+ */
 
 // event creation
-router.post('/newEvent', isAuthenticated, async (req, res, next) => {
-    const { title, date , city } = req.body;
-    Date.now()
-    try {
-        const newEvent = await Event.create(
-            {
-                title,
-                date,
-                city,
-                promoter: req.user.id
-            }
-        )
-        res.status(201).json({newEvent})
-    } catch(error){
-        next(error)
-    }
-})
+router.post("/newEvent", isAuthenticated, async (req, res, next) => {
+  const { title, date, city } = req.body;
+  Date.now();
+  try {
+    const newEvent = await Event.create({
+      title,
+      date,
+      city,
+      promoter: req.user.id,
+    });
+    res.status(201).json({ newEvent });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // event calling
+
+router.get("/event-list", async (req, res, next) => {
+  const city = req.query.city;
 
 
 router.get('/event-list', async (req, res, next) => {
@@ -64,7 +65,16 @@ router.patch('/:id', isAuthenticated, isAdminOrPromoter, async (req, res, next) 
     } catch(error) {
         next(error);
     }
-});
 
+// delete event
+router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
+  try {
+    const idEvent = req.params.id;
+    await Event.findByIdAndDelete(idEvent);
+    res.status("201").send({ message: `Event deleted : ${idEvent}` });
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;
