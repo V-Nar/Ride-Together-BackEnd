@@ -1,5 +1,6 @@
 const jsonWebToken = require("jsonwebtoken");
 const User = require("../models/User.model");
+const Event = require("../models/Event.model")
 
 const isAuthenticated = async (req, res, next) => {
   let token = req.headers.authorization;
@@ -28,4 +29,15 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { isAuthenticated, isAdmin };
+
+const isAdminOrPromoter = async (req, res, next) => {
+  const eventToUpdate = await Event.findById(req.params.id)
+  const isSameUser = eventToUpdate.promoter.toString() === req.user.id
+  if (isSameUser) {
+   return next()
+  }
+  res.status(401).json({ message: `You are not authorized to modify this event`})
+}
+
+module.exports = { isAuthenticated, isAdmin, isAdminOrPromoter };
+
