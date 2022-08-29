@@ -48,13 +48,9 @@ router.patch(
   isAdminOrPromoter,
   async (req, res, next) => {
     const { title, date } = req.body;
+    const { id } = req.params;
     try {
-      if (title) {
-        await Event.findByIdAndUpdate(req.params.id, { title }, { new: true });
-      }
-      if (date) {
-        await Event.findByIdAndUpdate(req.params.id, { date }, { new: true });
-      }
+      await Event.findByIdAndUpdate(id, { title, date }, { new: true });
       res.status(202).json(await Event.findById(req.params.id));
     } catch (error) {
       next(error);
