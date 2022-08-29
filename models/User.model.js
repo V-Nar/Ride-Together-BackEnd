@@ -16,6 +16,10 @@ const userSchema = new Schema({
     enum: ["admin", "user"],
     default: "user",
   },
+  email: {
+    type: String,
+    unique: true,
+  },
 });
 
 const User = model("User", userSchema);
