@@ -1,5 +1,6 @@
 const jsonWebToken = require("jsonwebtoken");
 const User = require("../models/User.model");
+
 const isAuthenticated = async (req, res, next) => {
   let token = req.headers.authorization;
   if (!token) {
