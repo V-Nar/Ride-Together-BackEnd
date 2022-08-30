@@ -1,11 +1,15 @@
+const {
+  checkValidityOfPassword,
+  wrongPassword,
+  checkValidityUsername,
+  wrongUsername,
+} = require("../utils/functions-gatherer");
 const router = require("express").Router();
 const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 const jsonWebToken = require("jsonwebtoken");
 nodemailer = require(`nodemailer`);
-// const Token = require("../models/Token.model");
-// const sendEmail = require("../utils/email/sendEmail");
-// const crypto = require("crypto");
+
 /**
  * All routes are prefixed with /api/auth
  */
@@ -22,9 +26,14 @@ router.post("/signup", async (req, res, next) => {
           "username already in use, try singning up with a different username",
       });
     }
-    // if password not long enough return bad request
-    if (password.length < 8) {
-      return res.status("411").send({ message: "invalid password length" });
+    if (!checkValidityUsername(username)) {
+      wrongUsername(res);
+      return;
+    }
+    // if password does not meet requirement return bad request
+    if (!checkValidityOfPassword(password)) {
+      wrongPassword(res);
+      return;
     }
     // encrypt password for security reason
     const hashedPassword = bcrypt.hashSync(password);
@@ -67,6 +76,8 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+// User reseting password. It send a reset email with specific token to the user.
+//It will then use the provided username/password to update the previous one.
 router.patch(`/reset-password`, async (req, res, next) => {
   try {
     const { username, password } = req.body;
@@ -86,10 +97,14 @@ router.patch(`/reset-password`, async (req, res, next) => {
         return;
       }
 
-      // if (!isValidPasswd(password)) {
-      //   handleInvalidPasswd(res);
-      //   return;
-      // }
+      if (!checkValidityOfPassword(password)) {
+        wrongPassword(res);
+        return;
+      }
+      if (!checkValidityUsername(username)) {
+        wrongUsername(res);
+        return;
+      }
 
       hashedPassword = await bcrypt.hashSync(password);
 
@@ -110,18 +125,15 @@ router.patch(`/reset-password`, async (req, res, next) => {
     }
 
     const foundUser = await User.findOne({ username });
-    // if (!foundUser) {
-    //   handleNotExist(`username`, username, res);
-    //   return;
-    // }
-    // if (!foundUser.email) {
-    //   res.status(403).json({
-    //     errors: {
-    //       email: `Password reset not possible. ${username} did not provide an email during signup`,
-    //     },
-    //   });
-    //   return;
-    // }
+    if (!foundUser) {
+      // return res
+      //   .status(400)
+      //   .send({
+      //     message:
+      //       "The specified username does not existe please provide the username used when creating your account",
+      //   });
+      return res.status(400).json({ errors: { id: "It is not a valid ID" } });
+    }
 
     resetToken = jsonWebToken.sign({ username }, process.env.TOKEN_SECRET, {
       algorithm: `HS256`,
