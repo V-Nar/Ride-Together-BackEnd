@@ -26,6 +26,10 @@ const eventSchema = new Schema(
       type: [Schema.Types.ObjectId],
       ref: "User",
     },
+    isFinished: {
+      type: Schema.Types.Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,

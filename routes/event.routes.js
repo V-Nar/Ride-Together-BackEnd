@@ -43,7 +43,7 @@ router.get("/event-list", async (req, res, next) => {
 
 // event update
 router.patch(
-  "/:id",
+  "/update-event/:id",
   isAuthenticated,
   isAdminOrPromoter,
   async (req, res, next) => {
@@ -58,12 +58,16 @@ router.patch(
 
 })
 
-// isFinished event route
-router.patch('/finish-event/', isAuthenticated, isAdminOrPromoter, async (req, res, next) => {
-    const { isFinished, date } = req.body;
-    const now = new Date();
-    try {
-      const pastEvent = await Event.find(date)
+// closeEvent event route
+router.patch('/:id', isAuthenticated, isAdminOrPromoter, async (req, res, next) => {
+  try {
+      let { isFinished } = req.body;
+      const closedEvent = await Event.findByIdAndUpdate(
+        req.params.id,
+        {isFinished: true},
+        {new: true},
+      )
+      res.status(202).json({ message: `event has been closed!`})
     } catch(error) {
         next(error)
     }
@@ -74,7 +78,7 @@ router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
   try {
     const idEvent = req.params.id;
     await Event.findByIdAndDelete(idEvent);
-    res.status("201").send({ message: `Event deleted : ${idEvent}` });
+    res.status(201).send({ message: `Event deleted : ${idEvent}` });
   } catch (error) {
     next(error);
   }
