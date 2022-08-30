@@ -22,10 +22,6 @@ const eventSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    attendees: {
-      type: [Schema.Types.ObjectId],
-      ref: "User",
-    },
     isFinished: {
       type: Schema.Types.Boolean,
       default: false,
