@@ -54,24 +54,27 @@ router.patch("/:id", isAuthenticated, async (req, res, next) => {
 router.delete(
   "/deleteprofile/:id",
   isAuthenticated,
-  isAdmin,
   async (req, res, next) => {
     try {
-      await User.findByIdAndDelete(req.params.id);
-      return res.status("201").send(`Character deleted : ${req.params.id}`);
+      if(req.user.role === "admin" || req.user.id === req.params.id){
+        await User.findByIdAndDelete(req.params.id);
+        return res.status("201").send(`Character deleted : ${req.params.id}`);
+      }
+
+      res.sendStatus(301).json({ message: `Account deleted!`});  // do some stuff
     } catch (error) {
       next(error);
     }
   }
 );
-//delete own profile
-router.delete("/deleteprofile", isAuthenticated, async (req, res, next) => {
-  try {
-    const { id } = req.user;
-    await User.findByIdAndDelete(id);
-    return res.status("201").send(`Character deleted : ${id}`);
-  } catch (error) {
-    next(error);
-  }
-});
+// //delete own profile
+// router.delete("/deleteprofile", isAuthenticated, async (req, res, next) => {
+//   try {
+//     const { id } = req.user;
+//     await User.findByIdAndDelete(id);
+//     return res.status("201").send(`Character deleted : ${id}`);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 module.exports = router;
