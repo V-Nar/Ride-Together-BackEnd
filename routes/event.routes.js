@@ -61,8 +61,7 @@ router.patch(
 // closeEvent event route
 router.patch('/:id', isAuthenticated, isAdminOrPromoter, async (req, res, next) => {
   try {
-      let { isFinished } = req.body;
-      const closedEvent = await Event.findByIdAndUpdate(
+      await Event.findByIdAndUpdate(
         req.params.id,
         {isFinished: true},
         {new: true},
