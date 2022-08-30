@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose');
-const User = require('./User.model');
 
 const eventSchema = new Schema (
     {
@@ -26,6 +25,10 @@ const eventSchema = new Schema (
             type: [Schema.Types.ObjectId],
             ref: 'User'
         },
+        isFinished: {
+            type: Schema.Types.Boolean,
+            default: false,
+        }
     },
     {
         timestamps: true,

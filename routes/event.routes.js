@@ -25,11 +25,6 @@ router.post("/newEvent", isAuthenticated, async (req, res, next) => {
 });
 
 // event calling
-
-router.get("/event-list", async (req, res, next) => {
-  const city = req.query.city;
-
-
 router.get('/event-list', async (req, res, next) => {
     const city = req.query.city;
     try {
@@ -65,6 +60,19 @@ router.patch('/:id', isAuthenticated, isAdminOrPromoter, async (req, res, next) 
     } catch(error) {
         next(error);
     }
+})
+
+// isFinished event route
+router.patch('/finish-event/', isAuthenticated, isAdminOrPromoter, async (req, res, next) => {
+    const { isFinished, date } = req.body;
+    const now = new Date();
+    try {
+      const pastEvent = await Event.find(date)
+    } catch(error) {
+        next(error)
+    }
+});
+
 
 // delete event
 router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {

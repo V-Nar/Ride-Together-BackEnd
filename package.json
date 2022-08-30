@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "seed": "node ./seeds/admin.seed.js"
+    "seed": "node ./seeds/admin.seed.js",
+    "updateDb": "node ./update/index.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -15,7 +16,9 @@
     "express": "^4.18.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.5.3",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.2",
+    "save": "^2.5.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
