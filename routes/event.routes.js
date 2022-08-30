@@ -1,10 +1,12 @@
 const router = require("express").Router();
 const User = require("../models/User.model");
 const Event = require("../models/Event.model");
+const Attendees = require("../models/attendees.model");
 const {
   isAuthenticated,
   isAdminOrPromoter,
 } = require("../middleware/middleware");
+const { findOneAndDelete } = require("../models/attendees.model");
 
 /**
  * all routes are prefix by /api/event
@@ -55,22 +57,27 @@ router.patch(
     } catch (error) {
       next(error);
     }
-
-})
+  }
+);
 
 // closeEvent event route
-router.patch('/:id', isAuthenticated, isAdminOrPromoter, async (req, res, next) => {
-  try {
+router.patch(
+  "/:id",
+  isAuthenticated,
+  isAdminOrPromoter,
+  async (req, res, next) => {
+    try {
       await Event.findByIdAndUpdate(
         req.params.id,
-        {isFinished: true},
-        {new: true},
-      )
-      res.status(202).json({ message: `event has been closed!`})
-    } catch(error) {
-        next(error)
+        { isFinished: true },
+        { new: true }
+      );
+      res.status(202).json({ message: `event has been closed!` });
+    } catch (error) {
+      next(error);
     }
-});
+  }
+);
 
 // delete event
 router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
@@ -83,4 +90,33 @@ router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
   }
 });
 
+router.post("/:id/join", isAuthenticated, async (req, res, next) => {
+  try {
+    const joinEvent = await Attendees.findOneAndUpdate(
+      {
+        event: req.params.id,
+        user: req.user.id,
+      },
+      {},
+      { upsert: true }
+    );
+    res.status(202).json({ joinEvent });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
+  try {
+    await Attendees.findOneAndDelete({
+      event: req.params.id,
+      user: req.user.id,
+    });
+    res.status(202).send({
+      message: `You are no longer taking part of this event : ${req.params.id}`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 module.exports = router;
