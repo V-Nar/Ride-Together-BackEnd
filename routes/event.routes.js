@@ -55,8 +55,19 @@ router.patch(
     } catch (error) {
       next(error);
     }
-  }
-);
+
+})
+
+// isFinished event route
+router.patch('/finish-event/', isAuthenticated, isAdminOrPromoter, async (req, res, next) => {
+    const { isFinished, date } = req.body;
+    const now = new Date();
+    try {
+      const pastEvent = await Event.find(date)
+    } catch(error) {
+        next(error)
+    }
+});
 
 // delete event
 router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
