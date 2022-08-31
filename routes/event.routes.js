@@ -6,8 +6,6 @@ const {
   isAuthenticated,
   isAdminOrPromoter,
 } = require("../middleware/middleware");
-const { findOneAndDelete } = require("../models/attendees.model");
-const { find } = require("../models/User.model");
 
 /**
  * all routes are prefix by /api/event
@@ -30,12 +28,12 @@ router.post("/newEvent", isAuthenticated, async (req, res, next) => {
   }
 });
 
-// event calling
+// events search
 router.get("/event-list", async (req, res, next) => {
   const city = req.query.city;
   try {
     if (city) {
-      const cityEvents = await Event.find({ city });
+      const cityEvents = await Event.find({ city, isFinished: false});
       return res.status(302).json({ cityEvents });
     }
     res.status(302).json(await Event.find());
@@ -61,7 +59,7 @@ router.patch(
   }
 );
 
-// closeEvent event route
+// close event manually
 router.patch(
   "/:id",
   isAuthenticated,
@@ -80,7 +78,7 @@ router.patch(
   }
 );
 
-// delete event
+// cancel an event
 router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
   try {
     const idEvent = req.params.id;
@@ -91,6 +89,8 @@ router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
   }
 });
 
+
+// join an event
 router.post("/:id/join", isAuthenticated, async (req, res, next) => {
   try {
     const joinEvent = await Attendees.findOneAndUpdate(
@@ -107,6 +107,8 @@ router.post("/:id/join", isAuthenticated, async (req, res, next) => {
   }
 });
 
+
+// leave an event
 router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
   try {
     await Attendees.findOneAndDelete({
@@ -120,6 +122,7 @@ router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
     next(error);
   }
 });
+
 
 router.get("/:id/attendeeslist", isAuthenticated, async (req, res, next) => {
   try {
@@ -141,4 +144,5 @@ router.get("/my-joined-event", isAuthenticated, async (req, res, next) => {
     next(error);
   }
 });
+
 module.exports = router;
