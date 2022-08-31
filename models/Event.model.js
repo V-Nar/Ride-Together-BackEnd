@@ -6,10 +6,13 @@ const eventSchema = new Schema(
       type: Schema.Types.String,
       required: true,
       maxlength: 50,
-
     },
     date: {
       type: Schema.Types.Date,
+      required: true,
+    },
+    address: {
+      type: Schema.Types.String,
       required: true,
     },
     city: {
