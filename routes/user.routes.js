@@ -4,6 +4,7 @@ const { findByIdAndUpdate } = require("../models/User.model");
 const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 const { isAuthenticated, isAdmin } = require("../middleware/middleware");
+const Attendees = require("../models/attendees.model");
 
 /**
  * All routes are prefixed with /api/user
@@ -51,30 +52,35 @@ router.patch("/:id", isAuthenticated, async (req, res, next) => {
 });
 
 // delete user profile
-router.delete(
-  "/deleteprofile/:id",
+router.delete("/deleteprofile/:id", isAuthenticated, async (req, res, next) => {
+  try {
+    if (req.user.role === "admin" || req.user.id === req.params.id) {
+      await User.findByIdAndDelete(req.params.id);
+      return res.status("201").send(`Character deleted : ${req.params.id}`);
+    }
+
+    res.sendStatus(301).json({ message: `Account deleted!` }); // do some stuff
+  } catch (error) {
+    next(error);
+  }
+});
+//get the list of event that i joined
+router.get(
+  "/joined/my-joined-event",
   isAuthenticated,
   async (req, res, next) => {
     try {
-      if(req.user.role === "admin" || req.user.id === req.params.id){
-        await User.findByIdAndDelete(req.params.id);
-        return res.status("201").send(`Character deleted : ${req.params.id}`);
-      }
-
-      res.sendStatus(301).json({ message: `Account deleted!`});  // do some stuff
+      const myListOfEvent = await Attendees.find({
+        user: req.user.id,
+      }).populate({
+        path: "event",
+        match: { isFinished: false },
+        select: "title city date -_id",
+      });
+      res.status(202).send({ "My joined event": myListOfEvent });
     } catch (error) {
       next(error);
     }
   }
 );
-// //delete own profile
-// router.delete("/deleteprofile", isAuthenticated, async (req, res, next) => {
-//   try {
-//     const { id } = req.user;
-//     await User.findByIdAndDelete(id);
-//     return res.status("201").send(`Character deleted : ${id}`);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 module.exports = router;
