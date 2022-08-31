@@ -7,6 +7,7 @@ const {
   isAdminOrPromoter,
 } = require("../middleware/middleware");
 const { findOneAndDelete } = require("../models/attendees.model");
+const { find } = require("../models/User.model");
 
 /**
  * all routes are prefix by /api/event
@@ -115,6 +116,27 @@ router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
     res.status(202).send({
       message: `You are no longer taking part of this event : ${req.params.id}`,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/:id/attendeeslist", isAuthenticated, async (req, res, next) => {
+  try {
+    const listOfAttendees = await Attendees.find({ event: req.params.id });
+    res.status(202).send({
+      "Number of attendees": listOfAttendees.length,
+      "list of Attendees": listOfAttendees,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/my-joined-event", isAuthenticated, async (req, res, next) => {
+  try {
+    const myListOfEvent = await Attendees.find({ user: req.user.id });
+    res.status(202).send({ "My joined event": myListOfEvent });
   } catch (error) {
     next(error);
   }
