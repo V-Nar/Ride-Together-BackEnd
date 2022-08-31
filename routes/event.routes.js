@@ -33,7 +33,7 @@ router.get("/event-list", async (req, res, next) => {
   const city = req.query.city;
   try {
     if (city) {
-      const cityEvents = await Event.find({ city, isFinished: false});
+      const cityEvents = await Event.find({ city, isFinished: false });
       return res.status(302).json({ cityEvents });
     }
     res.status(302).json(await Event.find());
@@ -89,7 +89,6 @@ router.delete("/deleteEvent/:id", isAuthenticated, async (req, res, next) => {
   }
 });
 
-
 // join an event
 router.post("/:id/join", isAuthenticated, async (req, res, next) => {
   try {
@@ -107,7 +106,6 @@ router.post("/:id/join", isAuthenticated, async (req, res, next) => {
   }
 });
 
-
 // leave an event
 router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
   try {
@@ -123,23 +121,15 @@ router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
   }
 });
 
-
+// get the list of people that will attend the event
 router.get("/:id/attendeeslist", isAuthenticated, async (req, res, next) => {
   try {
-    const listOfAttendees = await Attendees.find({ event: req.params.id });
+    const listOfAttendees = await Attendees.find({
+      event: req.params.id,
+    }).populate({ path: "user", select: "username level email -_id" });
     res.status(202).send({
-      "Number of attendees": listOfAttendees.length,
       "list of Attendees": listOfAttendees,
     });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/my-joined-event", isAuthenticated, async (req, res, next) => {
-  try {
-    const myListOfEvent = await Attendees.find({ user: req.user.id });
-    res.status(202).send({ "My joined event": myListOfEvent });
   } catch (error) {
     next(error);
   }
