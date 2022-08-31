@@ -9,7 +9,12 @@ const {
 
 /**
  * all routes are prefix by /api/event
- */
+*/
+
+/** 
+ * EVENT MANAGEMENT ROUTES
+ * 
+*/
 
 // event creation
 router.post("/newEvent", isAuthenticated, async (req, res, next) => {
@@ -24,34 +29,6 @@ router.post("/newEvent", isAuthenticated, async (req, res, next) => {
       promoter: req.user.id,
     });
     res.status(201).json({ newEvent });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// events search
-router.get("/event-list", async (req, res, next) => {
-  const city = req.query.city;
-  try {
-    if (city) {
-      const cityEvents = await Event.find({ city, isFinished: false }, 'title date city');
-      return res.status(302).json({ cityEvents });
-    }
-    res.status(302).json(await Event.find());
-  } catch (error) {
-    next(error);
-  }
-});
-
-// display all details of an event
-router.get("/:id/event-details", isAuthenticated, async (req, res, next) => {
-  try {
-    const listOfAttendees = await Attendees.find({
-      event: req.params.id,
-    }).populate({ path: "user", select: "username level email -_id" });
-    res.status(202).send({
-      "list of Attendees": listOfAttendees,
-    });
   } catch (error) {
     next(error);
   }
@@ -73,7 +50,7 @@ router.patch(
     }
   }
 );
-
+  
 // close event manually
 router.patch(
   "/:id",
@@ -99,11 +76,58 @@ router.delete(
   isAuthenticated,
   isAdminOrPromoter,
   async (req, res, next) => {
+    try {
+      const idEvent = req.params.id;
+      await Event.findByIdAndDelete(idEvent);
+      await Attendees.deleteMany({ event: `${idEvent}` });
+      res.status(301).send({ message: `Event deleted : ${idEvent}` });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * EVENTS INTERACTIONS ROUTES
+ */
+
+// events search
+router.get("/event-list", async (req, res, next) => {
+  const city = req.query.city;
   try {
-    const idEvent = req.params.id;
-    await Event.findByIdAndDelete(idEvent);
-    await Attendees.deleteMany({ event: `${idEvent}`})
-    res.status(301).send({ message: `Event deleted : ${idEvent}` });
+    if (city) {
+      const cityEvents = await Event.find(
+        { city, isFinished: false },
+        "title date city"
+      );
+      return res.status(302).json({ cityEvents });
+    }
+    res.status(302).json(await Event.find());
+  } catch (error) {
+    next(error);
+  }
+});
+
+// display full event infos
+router.get("/:id/event-details", isAuthenticated, async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const eventDetails = await Event.findById(id);
+    let eventAttendees = await Attendees.find(
+      { event: id },
+      "user"
+      ).populate({
+      path: "user",
+      select: "username -_id",
+    });
+
+    // keep this code commented, it will be added to front or kept here, no use yet
+    // eventAttendees = eventAttendees.map((x) => x.user.username);
+
+    res.status(200).json({
+      eventDetails,
+      eventAttendees,
+    });
   } catch (error) {
     next(error);
   }
@@ -120,7 +144,7 @@ router.post("/:id/join", isAuthenticated, async (req, res, next) => {
       {},
       { upsert: true }
     );
-    res.status(202).json({ message: `Event joined!`});
+    res.status(202).json({ message: `Event joined!` });
   } catch (error) {
     next(error);
   }
@@ -140,6 +164,5 @@ router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
     next(error);
   }
 });
-
 
 module.exports = router;

@@ -1,35 +1,18 @@
 const router = require("express").Router();
 const { json } = require("express");
-const { findByIdAndUpdate } = require("../models/User.model");
 const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
-const { isAuthenticated, isAdmin } = require("../middleware/middleware");
+const { isAuthenticated, isAdmin, isAdminOrPromoter } = require("../middleware/middleware");
 const Attendees = require("../models/attendees.model");
+const Event = require("../models/Event.model");
 
 /**
  * All routes are prefixed with /api/user
  */
 
-//Display every user signed up
-router.get("/", async (req, res, next) => {
-  try {
-    const allUser = await User.find();
-    res.status("200").json(allUser);
-  } catch (error) {
-    next(error);
-  }
-});
-
-//Display profile of specific user
-router.get("/:id", async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const thisUser = await User.findById(id);
-    res.status("200").json(thisUser);
-  } catch (error) {
-    next(error);
-  }
-});
+/**
+ * ACCOUNT MANAGEMENT
+ */
 
 // update user profile
 router.patch("/:id", isAuthenticated, async (req, res, next) => {
@@ -44,12 +27,12 @@ router.patch("/:id", isAuthenticated, async (req, res, next) => {
       {
         new: true,
       }
-    );
-    res.status("201").json(updateCharacter);
-  } catch (error) {
-    next("error");
-  }
-});
+      );
+      res.status("201").json(updateCharacter);
+    } catch (error) {
+      next("error");
+    }
+  });
 
 // delete user profile
 router.delete("/deleteprofile/:id", isAuthenticated, async (req, res, next) => {
@@ -64,23 +47,64 @@ router.delete("/deleteprofile/:id", isAuthenticated, async (req, res, next) => {
     next(error);
   }
 });
-//get the list of event that i joined
+
+//get all joined event list
 router.get(
-  "/joined/my-joined-event",
+  "/joined",
   isAuthenticated,
   async (req, res, next) => {
     try {
-      const myListOfEvent = await Attendees.find({
+      const myJoinedEvents = await Attendees.find({
         user: req.user.id,
       }).populate({
         path: "event",
         match: { isFinished: false },
         select: "title city date -_id",
       });
-      res.status(202).send({ "My joined event": myListOfEvent });
+      res.status(202).json(myJoinedEvents);
     } catch (error) {
       next(error);
     }
   }
 );
+
+//get all promoted event list
+router.get(
+  "/promoted",
+  isAuthenticated,
+  async (req, res, next) => {
+    try {
+      const myPromotedEvents = await Event.find({ promoter: req.user.id } , 'title date city' )
+      res.status(202).json(myPromotedEvents);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * USERS INTERACTTIONS
+ */
+
+//Display all signed up users
+router.get("/", async (req, res, next) => {
+  try {
+  const allUser = await User.find({}, 'username level');
+  res.status("200").json(allUser);
+  } catch (error) {
+  next(error);
+  }
+});
+
+//Display one user profile
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const thisUser = await User.findById(id, 'username level');
+    res.status("200").json(thisUser);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
