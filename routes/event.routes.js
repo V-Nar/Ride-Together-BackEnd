@@ -92,17 +92,39 @@ router.delete(
  */
 
 // events search
+
 router.get("/", async (req, res, next) => {
   const city = req.query.city;
+
   try {
-    if (city) {
-      const cityEvents = await Event.find(
-        { city, isFinished: false },
-        "title date city"
-      );
-      return res.status(302).json({ cityEvents });
-    }
-    res.status(302).json(await Event.find());
+    let $match = {}
+    if (city) $match = {city: {$in: [city].flat()}};
+
+    const cityEvents = await Event.aggregate([
+      {
+        $match,
+      },
+      {
+        $lookup: {
+          from: "attendees",
+          localField: "_id",
+          foreignField: "event",
+          as: "count",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          date: 1,
+          city: 1,
+          numOfAttendees: {
+            $size: "$count",
+          },
+        },
+      },
+    ]);
+
+    return res.status(200).json({ cityEvents });
   } catch (error) {
     next(error);
   }
