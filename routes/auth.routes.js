@@ -41,7 +41,6 @@ router.post("/signup", async (req, res, next) => {
       username,
       password: hashedPassword,
       level,
-      role,
       email,
     };
     const createdUser = await User.create(newUser);
