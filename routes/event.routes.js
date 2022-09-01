@@ -9,12 +9,12 @@ const {
 
 /**
  * all routes are prefix by /api/event
-*/
+ */
 
-/** 
+/**
  * EVENT MANAGEMENT ROUTES
- * 
-*/
+ *
+ */
 
 // event creation
 router.post("/newEvent", isAuthenticated, async (req, res, next) => {
@@ -50,7 +50,7 @@ router.patch(
     }
   }
 );
-  
+
 // close event manually
 router.patch(
   "/:id",
@@ -93,16 +93,37 @@ router.delete(
 
 // events search
 router.get("/event-list", async (req, res, next) => {
-  const city = req.query.city;
+  let city = req.query.city;
+
   try {
-    if (city) {
-      const cityEvents = await Event.find(
-        { city, isFinished: false },
-        "title date city"
-      );
-      return res.status(302).json({ cityEvents });
-    }
-    res.status(302).json(await Event.find());
+    let $match = {}
+    if (city) $match = {city: {$in: [city].flat()}};
+
+    const cityEvents = await Event.aggregate([
+      {
+        $match,
+      },
+      {
+        $lookup: {
+          from: "attendees",
+          localField: "_id",
+          foreignField: "event",
+          as: "count",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          date: 1,
+          city: 1,
+          numOfAttendees: {
+            $size: "$count",
+          },
+        },
+      },
+    ]);
+
+    return res.status(200).json({ cityEvents });
   } catch (error) {
     next(error);
   }
@@ -113,10 +134,7 @@ router.get("/:id/event-details", isAuthenticated, async (req, res, next) => {
   const { id } = req.params;
   try {
     const eventDetails = await Event.findById(id);
-    let eventAttendees = await Attendees.find(
-      { event: id },
-      "user"
-      ).populate({
+    let eventAttendees = await Attendees.find({ event: id }, "user").populate({
       path: "user",
       select: "username -_id",
     });
