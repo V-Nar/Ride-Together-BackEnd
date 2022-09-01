@@ -62,7 +62,8 @@ router.get("/joined", isAuthenticated, async (req, res, next) => {
       match: { isFinished: false },
       select: "title city date -_id",
     });
-    res.status(202).json(myJoinedEvents);
+    // const attendeesCount = await Attendees.count(myJoinedEvents.id);
+    res.status(200).json({myJoinedEvents, attendeesCount});
   } catch (error) {
     next(error);
   }
@@ -73,9 +74,10 @@ router.get("/promoted", isAuthenticated, async (req, res, next) => {
   try {
     const myPromotedEvents = await Event.find(
       { promoter: req.user.id },
-      "title date city"
+      "title date city",
     );
-    res.status(202).json(myPromotedEvents);
+    // const attendeesCount = await Attendees.count(myPromotedEvents.id);
+    res.status(200).json({myPromotedEvents, attendeesCount});
   } catch (error) {
     next(error);
   }
