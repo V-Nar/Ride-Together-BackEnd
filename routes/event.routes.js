@@ -9,15 +9,15 @@ const {
 
 /**
  * all routes are prefix by /api/event
-*/
+ */
 
-/** 
+/**
  * EVENT MANAGEMENT ROUTES
- * 
-*/
+ *
+ */
 
 // event creation
-router.post("/newEvent", isAuthenticated, async (req, res, next) => {
+router.post("/", isAuthenticated, async (req, res, next) => {
   const { title, date, address, city } = req.body;
   Date.now();
   try {
@@ -36,7 +36,7 @@ router.post("/newEvent", isAuthenticated, async (req, res, next) => {
 
 // event update
 router.patch(
-  "/:id/update-event/",
+  "/:id",
   isAuthenticated,
   isAdminOrPromoter,
   async (req, res, next) => {
@@ -50,10 +50,10 @@ router.patch(
     }
   }
 );
-  
+
 // close event manually
 router.patch(
-  "/:id",
+  "/close/:id",
   isAuthenticated,
   isAdminOrPromoter,
   async (req, res, next) => {
@@ -92,7 +92,7 @@ router.delete(
  */
 
 // events search
-router.get("/event-list", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   const city = req.query.city;
   try {
     if (city) {
@@ -109,14 +109,11 @@ router.get("/event-list", async (req, res, next) => {
 });
 
 // display full event infos
-router.get("/:id/event-details", isAuthenticated, async (req, res, next) => {
+router.get("/:id", isAuthenticated, async (req, res, next) => {
   const { id } = req.params;
   try {
     const eventDetails = await Event.findById(id);
-    let eventAttendees = await Attendees.find(
-      { event: id },
-      "user"
-      ).populate({
+    let eventAttendees = await Attendees.find({ event: id }, "user").populate({
       path: "user",
       select: "username -_id",
     });
@@ -134,7 +131,7 @@ router.get("/:id/event-details", isAuthenticated, async (req, res, next) => {
 });
 
 // join an event
-router.post("/:id/join", isAuthenticated, async (req, res, next) => {
+router.post("/attend/:id", isAuthenticated, async (req, res, next) => {
   try {
     const joinEvent = await Attendees.findOneAndUpdate(
       {
@@ -151,7 +148,7 @@ router.post("/:id/join", isAuthenticated, async (req, res, next) => {
 });
 
 // leave an event
-router.delete("/:id/leave", isAuthenticated, async (req, res, next) => {
+router.delete("/attend/:id", isAuthenticated, async (req, res, next) => {
   try {
     await Attendees.findOneAndDelete({
       event: req.params.id,
