@@ -81,7 +81,6 @@ router.patch(`/reset-password`, async (req, res, next) => {
   try {
     const { username, password } = req.body;
     let resetToken = req.query.token;
-
     if (resetToken) {
       const { username } = jsonWebToken.verify(
         resetToken,
@@ -125,12 +124,6 @@ router.patch(`/reset-password`, async (req, res, next) => {
 
     const foundUser = await User.findOne({ username });
     if (!foundUser) {
-      // return res
-      //   .status(400)
-      //   .send({
-      //     message:
-      //       "The specified username does not existe please provide the username used when creating your account",
-      //   });
       return res.status(400).json({ errors: { id: "It is not a valid ID" } });
     }
 
@@ -147,7 +140,6 @@ router.patch(`/reset-password`, async (req, res, next) => {
       },
     });
 
-    // use .env for the from field
     const emailResMsg = await transporter.sendMail({
       from: `'Ride-Together ' <${process.env.EMAIL_USERNAME}>`,
       to: foundUser.email,
