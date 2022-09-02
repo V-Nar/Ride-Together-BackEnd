@@ -19,7 +19,7 @@ const Event = require("../models/Event.model");
  */
 
 // update user profile
-router.patch("/:id", isAuthenticated, async (req, res, next) => {
+router.patch("/", isAuthenticated, async (req, res, next) => {
   try {
     const { id } = req.user;
     const { password, level } = req.body;
@@ -63,7 +63,7 @@ router.get("/joined", isAuthenticated, async (req, res, next) => {
       select: "title city date -_id",
     });
     // const attendeesCount = await Attendees.count(myJoinedEvents.id);
-    res.status(200).json({myJoinedEvents, attendeesCount});
+    res.status(200).json({ myJoinedEvents });
   } catch (error) {
     next(error);
   }
@@ -74,10 +74,10 @@ router.get("/promoted", isAuthenticated, async (req, res, next) => {
   try {
     const myPromotedEvents = await Event.find(
       { promoter: req.user.id },
-      "title date city",
+      "title date city"
     );
     // const attendeesCount = await Attendees.count(myPromotedEvents.id);
-    res.status(200).json({myPromotedEvents, attendeesCount});
+    res.status(200).json({ myPromotedEvents });
   } catch (error) {
     next(error);
   }
