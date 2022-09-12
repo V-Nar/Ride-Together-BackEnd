@@ -38,3 +38,7 @@ The user will need to sign up then log in. He will be able to filter trough city
 ### Tech Stack
 
 Nodejs, Express, MongoDB , heroku & mongodb atlas
+
+Postman Documentation link: https://documenter.getpostman.com/view/23034620/2s7YYpekUv
+
+Heroku link : https://ride-together.herokuapp.com/api/
