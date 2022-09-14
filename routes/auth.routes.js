@@ -9,14 +9,18 @@ const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 const jsonWebToken = require("jsonwebtoken");
 nodemailer = require(`nodemailer`);
+const fileUploader = require("../config/cloudinary.config");
 
 /**
  * All routes are prefixed with /api/auth
  */
 
 // Signing up routes
-router.post("/signup", async (req, res, next) => {
-  const { username, password, level, role, email } = req.body;
+router.post("/signup", fileUploader.single("image"), async (req, res, next) => {
+  const { username, password, level, email, image } = req.body;
+  if (!password) {
+    return res.status(400).send({ message: "dont forget to add a password !" });
+  }
   try {
     const foundUser = await User.findOne({ username });
     //If username already in use return bad request
@@ -35,6 +39,7 @@ router.post("/signup", async (req, res, next) => {
       wrongPassword(res);
       return;
     }
+
     // encrypt password for security reason
     const hashedPassword = bcrypt.hashSync(password);
     const newUser = {
@@ -42,7 +47,9 @@ router.post("/signup", async (req, res, next) => {
       password: hashedPassword,
       level,
       email,
+      image: req.file ? req.file.path : undefined,
     };
+
     const createdUser = await User.create(newUser);
     res.status(201).json({ message: `User ${username} created` });
   } catch (error) {

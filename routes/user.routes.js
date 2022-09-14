@@ -90,7 +90,7 @@ router.get("/promoted", isAuthenticated, async (req, res, next) => {
 //Display all signed up users
 router.get("/", async (req, res, next) => {
   try {
-    const allUser = await User.find({}, "username level");
+    const allUser = await User.find({}, "username level image");
     res.status("200").json(allUser);
   } catch (error) {
     next(error);
