@@ -8,6 +8,7 @@ const isAuthenticated = async (req, res, next) => {
     return res.status(400).json({ message: "No token found!" });
   }
   token = token.replace("Bearer ", "");
+  console.log(token);
   const userToken = jsonWebToken.verify(token, process.env.TOKEN_SECRET);
   try {
     const user = await User.findOne({ username: userToken.username });
