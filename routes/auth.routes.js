@@ -10,6 +10,7 @@ const bcrypt = require("bcryptjs");
 const jsonWebToken = require("jsonwebtoken");
 nodemailer = require(`nodemailer`);
 const fileUploader = require("../config/cloudinary.config");
+const { isAuthenticated } = require("../middleware/middleware");
 
 /**
  * All routes are prefixed with /api/auth
@@ -164,4 +165,7 @@ router.patch(`/reset-password`, async (req, res, next) => {
   }
 });
 
+router.get("/me", isAuthenticated, (req, res, next) => {
+  res.status(200).json({ user: req.user });
+});
 module.exports = router;
