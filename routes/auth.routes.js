@@ -12,14 +12,13 @@ nodemailer = require(`nodemailer`);
 const fileUploader = require("../config/cloudinary.config");
 const { isAuthenticated } = require("../middleware/middleware");
 
-
 /**
  * All routes are prefixed with /api/auth
  */
 
 // Signing up routes
 router.post("/signup", fileUploader.single("image"), async (req, res, next) => {
-  const { username, password, level, email, profilPic } = req.body;
+  const { username, password, level, email, profilePic } = req.body;
   if (!password) {
     return res.status(400).send({ message: "dont forget to add a password !" });
   }
