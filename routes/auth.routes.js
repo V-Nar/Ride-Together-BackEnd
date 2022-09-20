@@ -12,6 +12,7 @@ nodemailer = require(`nodemailer`);
 const fileUploader = require("../config/cloudinary.config");
 const { isAuthenticated } = require("../middleware/middleware");
 
+
 /**
  * All routes are prefixed with /api/auth
  */

@@ -18,6 +18,7 @@ const Event = require("../models/Event.model");
  * ACCOUNT MANAGEMENT
  */
 
+
 // update user profile
 router.patch("/", isAuthenticated, async (req, res, next) => {
   try {
