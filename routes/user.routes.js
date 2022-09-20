@@ -18,11 +18,12 @@ const Event = require("../models/Event.model");
  * ACCOUNT MANAGEMENT
  */
 
+
 // update user profile
 router.patch("/", isAuthenticated, async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { password, level, email, image } = req.body;
+    const { password, level, email, profilePic } = req.body;
     // encrypt password for security reason
     let hashedPassword;
     const searchQuery = {};
@@ -36,8 +37,8 @@ router.patch("/", isAuthenticated, async (req, res, next) => {
     if (email) {
       searchQuery.email = email;
     }
-    if (image) {
-      searchQuery.image = image;
+    if (profilePic) {
+      searchQuery.profilePic = profilePic;
     }
     const updateCharacter = await User.findByIdAndUpdate(id, searchQuery, {
       new: true,
@@ -101,7 +102,7 @@ router.get("/promoted", isAuthenticated, async (req, res, next) => {
 //Display all signed up users
 router.get("/", async (req, res, next) => {
   try {
-    const allUser = await User.find({}, "username level image");
+    const allUser = await User.find({}, "username level profilePic");
     res.status("200").json(allUser);
   } catch (error) {
     next(error);
