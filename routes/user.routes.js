@@ -22,19 +22,27 @@ const Event = require("../models/Event.model");
 router.patch("/", isAuthenticated, async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { password, level, profilePic } = req.body;
+    const { password, level, email, profilePic } = req.body;
     // encrypt password for security reason
-    const hashedPassword = bcrypt.hashSync(password);
-    const updateCharacter = await User.findByIdAndUpdate(
-      id,
-      { password: hashedPassword,
-        level,
-        profilePic
-      },
-      {
-        new: true,
-      }
-    );
+    let hashedPassword;
+    const searchQuery = {};
+    if (password) {
+      hashedPassword = bcrypt.hashSync(password);
+      searchQuery.hashedPassword = hashedPassword;
+    }
+    if (level) {
+      searchQuery.level = level;
+    }
+    if (email) {
+      searchQuery.email = email;
+    }
+    if (profilePic) {
+      searchQuery.profilePic = profilePic;
+    }
+    const updateCharacter = await User.findByIdAndUpdate(id, searchQuery, {
+      new: true,
+      select: { password: 0 },
+    });
     res.status("201").json(updateCharacter);
   } catch (error) {
     next("error");
@@ -93,7 +101,7 @@ router.get("/promoted", isAuthenticated, async (req, res, next) => {
 //Display all signed up users
 router.get("/", async (req, res, next) => {
   try {
-    const allUser = await User.find({}, "username level image");
+    const allUser = await User.find({}, "username level profilePic");
     res.status("200").json(allUser);
   } catch (error) {
     next(error);
