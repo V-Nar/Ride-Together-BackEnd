@@ -22,16 +22,27 @@ const Event = require("../models/Event.model");
 router.patch("/", isAuthenticated, async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { password, level } = req.body;
+    const { password, level, email, image } = req.body;
     // encrypt password for security reason
-    const hashedPassword = bcrypt.hashSync(password);
-    const updateCharacter = await User.findByIdAndUpdate(
-      id,
-      { password: hashedPassword, level },
-      {
-        new: true,
-      }
-    );
+    let hashedPassword;
+    const searchQuery = {};
+    if (password) {
+      hashedPassword = bcrypt.hashSync(password);
+      searchQuery.hashedPassword = hashedPassword;
+    }
+    if (level) {
+      searchQuery.level = level;
+    }
+    if (email) {
+      searchQuery.email = email;
+    }
+    if (image) {
+      searchQuery.image = image;
+    }
+    const updateCharacter = await User.findByIdAndUpdate(id, searchQuery, {
+      new: true,
+      select: { password: 0 },
+    });
     res.status("201").json(updateCharacter);
   } catch (error) {
     next("error");
