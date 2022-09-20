@@ -18,7 +18,7 @@ const { isAuthenticated } = require("../middleware/middleware");
 
 // Signing up routes
 router.post("/signup", fileUploader.single("image"), async (req, res, next) => {
-  const { username, password, level, email, image } = req.body;
+  const { username, password, level, email, profilPic } = req.body;
   if (!password) {
     return res.status(400).send({ message: "dont forget to add a password !" });
   }
@@ -48,7 +48,7 @@ router.post("/signup", fileUploader.single("image"), async (req, res, next) => {
       password: hashedPassword,
       level,
       email,
-      image: req.file ? req.file.path : undefined,
+      profilePic: req.file ? req.file.path : undefined,
     };
 
     const createdUser = await User.create(newUser);

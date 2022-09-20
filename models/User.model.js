@@ -22,7 +22,7 @@ const userSchema = new Schema(
       unique: true,
       required: true,
     },
-    image: {
+    profilePic: {
       type: String,
       default:
         "https://res.cloudinary.com/dfnnt6dxd/image/upload/v1663170581/rt-profile-pictures/default-profile_zyi0mq.png",

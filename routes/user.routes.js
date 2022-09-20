@@ -22,12 +22,15 @@ const Event = require("../models/Event.model");
 router.patch("/", isAuthenticated, async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { password, level } = req.body;
+    const { password, level, profilePic } = req.body;
     // encrypt password for security reason
     const hashedPassword = bcrypt.hashSync(password);
     const updateCharacter = await User.findByIdAndUpdate(
       id,
-      { password: hashedPassword, level },
+      { password: hashedPassword,
+        level,
+        profilePic
+      },
       {
         new: true,
       }
