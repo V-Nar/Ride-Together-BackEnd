@@ -118,6 +118,7 @@ router.get("/", async (req, res, next) => {
           title: 1,
           date: 1,
           city: 1,
+          isFinished: 1,
           numOfAttendees: {
             $size: "$count",
           },
