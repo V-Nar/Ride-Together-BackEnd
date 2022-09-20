@@ -95,9 +95,10 @@ router.delete(
 
 router.get("/", async (req, res, next) => {
   const city = req.query.city;
+  const finished = req.query.isFinished;
 
   try {
-    let $match = {}
+    let $match = {isFinished: finished}
     if (city) $match = {city: {$in: [city].flat()}};
 
     const cityEvents = await Event.aggregate([
