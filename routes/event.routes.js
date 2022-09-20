@@ -96,13 +96,14 @@ router.delete(
 router.get("/", async (req, res, next) => {
   const city = req.query.city;
   const finished = req.query.isFinished === 'true' ? true : false
-
+  const $match = {}
   try {
-    if (city) $match = {city: {$in: [city].flat()}};
+    if (city) $match.city = {$in: [city].flat()};
+    if (req.query.isFinished) $match.isFinished = finished
 
     const cityEvents = await Event.aggregate([
       {
-        $match: {isFinished: finished},
+        $match
       },
       {
         $lookup: {
