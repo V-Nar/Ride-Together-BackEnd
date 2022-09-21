@@ -17,46 +17,53 @@ const { isAuthenticated } = require("../middleware/middleware");
  */
 
 // Signing up routes
-router.post("/signup", fileUploader.single("image"), async (req, res, next) => {
-  const { username, password, level, email, profilePic } = req.body;
-  if (!password) {
-    return res.status(400).send({ message: "dont forget to add a password !" });
-  }
-  try {
-    const foundUser = await User.findOne({ username });
-    //If username already in use return bad request
-    if (foundUser) {
-      return res.status("400").send({
-        message:
-          "username already in use, try singning up with a different username",
-      });
+router.post(
+  "/signup",
+  fileUploader.single("profilePic"),
+  async (req, res, next) => {
+    const { username, password, level, email } = req.body;
+    if (!password) {
+      return res
+        .status(400)
+        .send({ message: "dont forget to add a password !" });
     }
-    if (!checkValidityUsername(username)) {
-      wrongUsername(res);
-      return;
-    }
-    // if password does not meet requirement return bad request
-    if (!checkValidityOfPassword(password)) {
-      wrongPassword(res);
-      return;
-    }
+    try {
+      const foundUser = await User.findOne({ username });
+      //If username already in use return bad request
+      if (foundUser) {
+        return res.status("400").send({
+          message:
+            "username already in use, try singning up with a different username",
+        });
+      }
+      if (!checkValidityUsername(username)) {
+        wrongUsername(res);
+        return;
+      }
+      // if password does not meet requirement return bad request
+      if (!checkValidityOfPassword(password)) {
+        wrongPassword(res);
+        return;
+      }
 
-    // encrypt password for security reason
-    const hashedPassword = bcrypt.hashSync(password);
-    const newUser = {
-      username,
-      password: hashedPassword,
-      level,
-      email,
-      profilePic: req.file ? req.file.path : undefined,
-    };
+      // encrypt password for security reason
+      const hashedPassword = bcrypt.hashSync(password);
+      const newUser = {
+        username,
+        password: hashedPassword,
+        level,
+        email,
+        profilePic: req.file ? req.file.path : undefined,
+      };
+      console.log({ newUser });
 
-    const createdUser = await User.create(newUser);
-    res.status(201).json({ message: `User ${username} created` });
-  } catch (error) {
-    next(error);
+      const createdUser = await User.create(newUser);
+      res.status(201).json({ message: `User ${username} created` });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 // User login method
 router.post("/login", async (req, res, next) => {
