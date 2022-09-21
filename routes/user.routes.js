@@ -50,7 +50,7 @@ router.patch(
       });
       res.status("201").json(updateCharacter);
     } catch (error) {
-      next("error");
+      next(error);
     }
   }
 );
