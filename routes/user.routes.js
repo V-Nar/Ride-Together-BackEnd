@@ -9,6 +9,7 @@ const {
 } = require("../middleware/middleware");
 const Attendees = require("../models/attendees.model");
 const Event = require("../models/Event.model");
+const fileUploader = require("../config/cloudinary.config");
 
 /**
  * All routes are prefixed with /api/user
@@ -18,37 +19,41 @@ const Event = require("../models/Event.model");
  * ACCOUNT MANAGEMENT
  */
 
-
 // update user profile
-router.patch("/", isAuthenticated, async (req, res, next) => {
-  try {
-    const { id } = req.user;
-    const { password, level, email, profilePic } = req.body;
-    // encrypt password for security reason
-    let hashedPassword;
-    const searchQuery = {};
-    if (password) {
-      hashedPassword = bcrypt.hashSync(password);
-      searchQuery.hashedPassword = hashedPassword;
+router.patch(
+  "/",
+  isAuthenticated,
+  fileUploader.single("profilePic"),
+  async (req, res, next) => {
+    try {
+      const { id } = req.user;
+      const { password, level, email } = req.body;
+      // encrypt password for security reason
+      let hashedPassword;
+      const searchQuery = {};
+      if (password) {
+        hashedPassword = bcrypt.hashSync(password);
+        searchQuery.hashedPassword = hashedPassword;
+      }
+      if (level) {
+        searchQuery.level = level;
+      }
+      if (email) {
+        searchQuery.email = email;
+      }
+      if (profilePic) {
+        searchQuery.profilePic = req.file ? req.file.path : undefined;
+      }
+      const updateCharacter = await User.findByIdAndUpdate(id, searchQuery, {
+        new: true,
+        select: { password: 0 },
+      });
+      res.status("201").json(updateCharacter);
+    } catch (error) {
+      next("error");
     }
-    if (level) {
-      searchQuery.level = level;
-    }
-    if (email) {
-      searchQuery.email = email;
-    }
-    if (profilePic) {
-      searchQuery.profilePic = profilePic;
-    }
-    const updateCharacter = await User.findByIdAndUpdate(id, searchQuery, {
-      new: true,
-      select: { password: 0 },
-    });
-    res.status("201").json(updateCharacter);
-  } catch (error) {
-    next("error");
   }
-});
+);
 
 // delete user profile
 router.delete("/:id", isAuthenticated, async (req, res, next) => {
