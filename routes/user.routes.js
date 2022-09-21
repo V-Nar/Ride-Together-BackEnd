@@ -41,8 +41,8 @@ router.patch(
       if (email) {
         searchQuery.email = email;
       }
-      if (profilePic) {
-        searchQuery.profilePic = req.file ? req.file.path : undefined;
+      if (req.file) {
+        searchQuery.profilePic = req.file.path;
       }
       const updateCharacter = await User.findByIdAndUpdate(id, searchQuery, {
         new: true,
