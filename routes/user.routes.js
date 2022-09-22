@@ -58,12 +58,13 @@ router.patch(
 // delete user profile
 router.delete("/:id", isAuthenticated, async (req, res, next) => {
   try {
+    console.log(req.user.id, req.params.id, "hello");
     if (req.user.role === "admin" || req.user.id === req.params.id) {
       await User.findByIdAndDelete(req.params.id);
       return res.status("201").send(`Character deleted : ${req.params.id}`);
     }
 
-    res.sendStatus(301).json({ message: `Account deleted!` }); // do some stuff
+    res.send(401).json({ message: "Access Denied" }); // do some stuff
   } catch (error) {
     next(error);
   }
