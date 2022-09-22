@@ -95,15 +95,15 @@ router.delete(
 
 router.get("/", async (req, res, next) => {
   const city = req.query.city;
-  const finished = req.query.isFinished === 'true' ? true : false
-  const $match = {}
+  const finished = req.query.isFinished === "true" ? true : false;
+  const $match = {};
   try {
-    if (city) $match.city = {$in: [city].flat()};
-    if (req.query.isFinished) $match.isFinished = finished
+    if (city) $match.city = { $in: [city].flat() };
+    if (req.query.isFinished) $match.isFinished = finished;
 
     const cityEvents = await Event.aggregate([
       {
-        $match
+        $match,
       },
       {
         $lookup: {
@@ -119,6 +119,7 @@ router.get("/", async (req, res, next) => {
           date: 1,
           city: 1,
           isFinished: 1,
+          promoter: 1,
           numOfAttendees: {
             $size: "$count",
           },
