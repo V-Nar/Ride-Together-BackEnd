@@ -96,6 +96,7 @@ router.delete(
 router.get("/", async (req, res, next) => {
   const city = req.query.city;
   const finished = req.query.isFinished === "true" ? true : false;
+
   const $match = {};
   try {
     if (city) $match.city = { $in: [city].flat() };
@@ -164,9 +165,12 @@ router.post("/attend/:id", isAuthenticated, async (req, res, next) => {
         user: req.user.id,
       },
       {},
-      { upsert: true }
-    );
-    res.status(202).json({ message: `Event joined!` });
+      { upsert: true, new: true, select: { user: 1, _id: 1 } }
+    ).populate({
+      path: "user",
+      select: { username: 1, _id: 0 },
+    });
+    res.status(202).json(joinEvent);
   } catch (error) {
     next(error);
   }
