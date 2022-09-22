@@ -138,7 +138,10 @@ router.get("/", async (req, res, next) => {
 router.get("/:id", isAuthenticated, async (req, res, next) => {
   const { id } = req.params;
   try {
-    const eventDetails = await Event.findById(id);
+    const eventDetails = await Event.findById(id).populate({
+      path: "promoter",
+      select: "username -_id",
+    });
     let eventAttendees = await Attendees.find({ event: id }, "user").populate({
       path: "user",
       select: "username -_id",
